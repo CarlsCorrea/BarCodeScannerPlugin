@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="cordova-plugin-barcodescannerplugin" version="0.0.1">
+    <name>BarCodeScannerPlugin</name>
+
+    <description></description>
+    <license>MIT</license>
+
+    <keywords>cordova</keywords>
+    <repo>https://github.com/CarlsCorrea/BarCodeScannerPlugin.git</repo>
+    <issue>https://github.com/CarlsCorrea/BarCodeScannerPlugin/issues</issue>
+  
+    <engines>
+        <engine name="cordova" version=">=3.0.0"/>
+    </engines>
+  
+    <js-module src="www/barcodescannerplugin.js" name="barCodeScannerPlugin">
+        <clobbers target="window.plugins.barCodeScannerPlugin" />
+    </js-module>
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="BarCodeScannerPlugin">
+                <param name="android-package" value="com.carlscorrea.cordova.plugin.BarCodeScannerPlugin"/>
+            </feature>
+        </config-file>
+
+        <source-file src="src/android/BarCodeScannerPlugin.java" target-dir="src/com/carlscorrea/cordova/plugin" />
+    </platform>
+</plugin>
