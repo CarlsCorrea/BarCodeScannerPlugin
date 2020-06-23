@@ -4,9 +4,7 @@ function BarCodeScannerPlugin() {}
 // The function that passes work along to native shells
 // Message is a string, duration may be 'long' or 'short'
 BarCodeScannerPlugin.prototype.show = function(successCallback, errorCallback) {
-
   var options = {};
-
   cordova.exec(successCallback, errorCallback, 'BarCodeScannerPlugin', 'show', [options]);
 }
 

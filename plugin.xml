@@ -18,6 +18,14 @@
     <js-module src="www/barcodescannerplugin.js" name="barCodeScannerPlugin">
         <clobbers target="window.plugins.barCodeScannerPlugin" />
     </js-module>
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="BarCodeScannerPlugin">
+                <param name="ios-package" value="BarCodeScannerPlugin" />
+                <param name="onload" value="true" />
+            </feature>
+        </config-file>
+    </platform>
     <platform name="android">
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="BarCodeScannerPlugin">
