@@ -18,14 +18,20 @@ public class BarCodeScannerPlugin extends CordovaPlugin {
         callbackContext.error("\"" + action + "\" is not a recognized action.");
         return false;
       }
-      
-      // Create the toast
-      Toast toast = Toast.makeText(cordova.getActivity(), "its working", Toast.LENGTH_LONG);
-      // Display toast
-      toast.show();
-      // Send a positive result to the callbackContext
-      PluginResult pluginResult = new PluginResult(PluginResult.Status.OK);
-      callbackContext.sendPluginResult(pluginResult);
-      return true;
+      cordova.getActivity().runOnUiThread(new Runnable() {
+        public void run() {
+            // Thread-safe.
+            // Create the toast
+            Toast toast = Toast.makeText(cordova.getActivity(), "its working", Toast.LENGTH_LONG);
+            // Display toast
+            toast.show();
+            // Send a positive result to the callbackContext
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK);
+            callbackContext.sendPluginResult(pluginResult);
+        }
+      });
+    }
   }
-}
+        
+      
+  
