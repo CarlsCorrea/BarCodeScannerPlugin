@@ -11,12 +11,24 @@ let cameraManager = CameraViewController()
 var parentView: UIView? = nil;
 var view = UIView(frame: parentView!.bounds);
 var cameraStarted: Bool = false;
+var callbackId:String=""
 
-@objc(BarCodeScannerPlugin) class BarCodeScannerPlugin : CDVPlugin { // Declare the namespace you want to expose to cordova, when you call the Plugin
+@objc(BarCodeScannerPlugin) class BarCodeScannerPlugin : CDVPlugin, CameraViewControllerDelegate {
     
-    @objc(startCamera:)
-    func startCamera(command: CDVInvokedUrlCommand) {
+    func sendResult(result:String) {
+        print("resultsText = \(result)")
+        
         var pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR);
+        
+        
+        pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: cameraManager.resultsText);
+        self.commandDelegate!.send(pluginResult, callbackId: callbackId);
+    }
+    
+    @objc(scan:)
+    func scan(command: CDVInvokedUrlCommand) {
+        var pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR);
+        callbackId = command.callbackId
 
         UIApplication.shared.isIdleTimerDisabled = true
         parentView = nil;
@@ -32,12 +44,9 @@ var cameraStarted: Bool = false;
         
         cameraStarted = true;
 
-        print("resultsText \(cameraManager.resultsText)")
-        
-        
         pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: cameraManager.resultsText);
         self.commandDelegate!.send(pluginResult, callbackId: command.callbackId);
     }
-
+    
 }
 

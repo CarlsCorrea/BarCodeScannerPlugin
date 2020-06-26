@@ -29,9 +29,6 @@
             </feature>
         </config-file>
 
-        <source-file src="src/ios/CameraViewController.swift" />
-        <source-file src="src/ios/BarCodeScannerPlugin.swift" />
-        <source-file src="src/ios/UIUtilities.swift" />
         <podspec>
             <config>
                 <source url="https://github.com/CocoaPods/Specs.git"/>
@@ -40,6 +37,9 @@
                 <pod name="GoogleMLKit/BarcodeScanning"/>
             </pods>
         </podspec>
+        <source-file src="src/ios/CameraViewController.swift" />
+        <source-file src="src/ios/BarCodeScannerPlugin.swift" />
+        <source-file src="src/ios/UIUtilities.swift" />
 
     </platform>
     <platform name="android">

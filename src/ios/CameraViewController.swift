@@ -9,6 +9,10 @@ import AVFoundation
 import CoreVideo
 import MLKit
 
+protocol CameraViewControllerDelegate: class {
+    func sendResult(result:String)
+}
+
 @objc(CameraViewController)
 class CameraViewController: UIViewController {
     
@@ -17,6 +21,8 @@ class CameraViewController: UIViewController {
     private lazy var sessionQueue = DispatchQueue(label: Constant.sessionQueueLabel, qos: .background)
     private var isFrontCamera = false
     private var lastFrame: CMSampleBuffer?
+    
+    weak var delegate: CameraViewControllerDelegate?
     
     /// A string holding current results from detection.
     var resultsText = ""
@@ -238,7 +244,7 @@ class CameraViewController: UIViewController {
             
           self.resultsText = barcode.rawValue!
           self.annotationOverlayView.addSubview(label)
-          self.navigationController?.popViewController(animated: true)
+          delegate?.sendResult(result: self.resultsText)
         }
       }
     }
