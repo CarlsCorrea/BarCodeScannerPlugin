@@ -7,16 +7,37 @@
 
 import Foundation
 
-@objc(BarCodeScannerPlugin) class BarCodeScannerPlugin : CDVPlugin { // Declare the namespace you want to expose to cordova, when you call the Plugin
-  @objc(show:) // Declare the function that you want to expose to cordova, when you call the function (plugin.functionName)
-  func show(command: CDVInvokedUrlCommand) { // write the function.
-    
-    // Assume that the plugin is going to fail (even if in this example, it can't).
-    var pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR);
+let cameraManager = CameraViewController()
+var parentView: UIView? = nil;
+var view = UIView(frame: parentView!.bounds);
+var cameraStarted: Bool = false;
 
-    pluginResult = CDVPluginResult(status: CDVCommandStatus_OK); // Set the plugin result to send back to the client.js file.
-    print("The BarCodeScannerPlugin test function ran correctly!"); // Just for giggles.
-    self.commandDelegate!.send(pluginResult, callbackId: command.callbackId); // Send the function result back to cordova.
-  }
+@objc(BarCodeScannerPlugin) class BarCodeScannerPlugin : CDVPlugin { // Declare the namespace you want to expose to cordova, when you call the Plugin
+    
+    @objc(startCamera:)
+    func startCamera(command: CDVInvokedUrlCommand) {
+        var pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR);
+
+        UIApplication.shared.isIdleTimerDisabled = true
+        parentView = nil;
+
+        parentView = UIView(frame: self.webView.frame)
+        webView?.superview?.addSubview(parentView!)
+        parentView!.addSubview(view)
+        parentView!.isUserInteractionEnabled = true
+
+        webView?.isOpaque = false
+
+        parentView?.addSubview(cameraManager.view)
+        
+        cameraStarted = true;
+
+        print("resultsText \(cameraManager.resultsText)")
+        
+        
+        pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: cameraManager.resultsText);
+        self.commandDelegate!.send(pluginResult, callbackId: command.callbackId);
+    }
+
 }
 

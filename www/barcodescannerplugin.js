@@ -1,14 +1,30 @@
-// Empty constructor
 function BarCodeScannerPlugin() {}
 
-// The function that passes work along to native shells
-// Message is a string, duration may be 'long' or 'short'
-BarCodeScannerPlugin.prototype.show = function(successCallback, errorCallback) {
+BarCodeScannerPlugin.prototype.scan = function(successCallback, errorCallback) {
   var options = {};
-  cordova.exec(successCallback, errorCallback, 'BarCodeScannerPlugin', 'show', [options]);
+  
+  if (errorCallback == null) {
+    errorCallback = function () {};
+  }
+
+  if (typeof errorCallback != "function") {
+      console.log("BarCodeScannerPlugin.scan failure: failure parameter not a function");
+      return;
+  }
+
+  if (typeof successCallback != "function") {
+      console.log("BarCodeScannerPlugin.scan failure: success callback parameter must be a function");
+      return;
+  }
+
+  exec(function (result) {
+      successCallback(result);
+  }, function (error) {
+      errorCallback(error);
+  }, 'BarCodeScannerPlugin', 'scan', config);
+
 }
 
-// Installation constructor that binds ToastyPlugin to window
 BarCodeScannerPlugin.install = function() {
   if (!window.plugins) {
     window.plugins = {};
@@ -17,3 +33,4 @@ BarCodeScannerPlugin.install = function() {
   return window.plugins.barCodeScannerPlugin;
 };
 cordova.addConstructor(BarCodeScannerPlugin.install);
+
