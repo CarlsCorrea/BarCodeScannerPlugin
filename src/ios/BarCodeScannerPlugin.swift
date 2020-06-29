@@ -15,32 +15,28 @@ var callbackId:String=""
 
 @objc(BarCodeScannerPlugin) class BarCodeScannerPlugin : CDVPlugin, CameraViewControllerDelegate {
     
+    @objc(sendResult:)
     func sendResult(result:String) {
-        print("resultsText = \(result)")
-        
         var pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR);
         
         
-        pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: cameraManager.resultsText);
+        pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: result);
         self.commandDelegate!.send(pluginResult, callbackId: callbackId);
     }
     
     @objc(scan:)
     func scan(command: CDVInvokedUrlCommand) {
         var pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR);
+        
         callbackId = command.callbackId
 
+        cameraManager.delegate = self
+        
         UIApplication.shared.isIdleTimerDisabled = true
-        parentView = nil;
-
-        parentView = UIView(frame: self.webView.frame)
-        webView?.superview?.addSubview(parentView!)
-        parentView!.addSubview(view)
-        parentView!.isUserInteractionEnabled = true
-
-        webView?.isOpaque = false
-
-        parentView?.addSubview(cameraManager.view)
+        
+        let navigationController = UINavigationController(rootViewController: cameraManager)
+        navigationController.modalPresentationStyle = .fullScreen
+        viewController.present(navigationController, animated: true)
         
         cameraStarted = true;
 
