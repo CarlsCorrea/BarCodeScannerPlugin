@@ -1,19 +1,23 @@
-// Empty constructor
-function BarCodeScannerPlugin() {}
+// ----------------------------------------------------------------------------
+// |  Imports
+// ----------------------------------------------------------------------------
+var exec = require('cordova/exec');
 
-// The function that passes work along to native shells
-// Message is a string, duration may be 'long' or 'short'
-BarCodeScannerPlugin.prototype.show = function(successCallback, errorCallback) {
-  var options = {};
-  cordova.exec(successCallback, errorCallback, 'BarCodeScannerPlugin', 'show', [options]);
-}
+// ----------------------------------------------------------------------------
+// |  Public interface
+// ----------------------------------------------------------------------------
 
-// Installation constructor that binds ToastyPlugin to window
-BarCodeScannerPlugin.install = function() {
-  if (!window.plugins) {
-    window.plugins = {};
-  }
-  window.plugins.barCodeScannerPlugin = new BarCodeScannerPlugin();
-  return window.plugins.barCodeScannerPlugin;
+exports.scan = function (p_OnSuccess, p_OnError) {
+  return scan(p_OnSuccess, p_OnError);
 };
-cordova.addConstructor(BarCodeScannerPlugin.install);
+
+// ----------------------------------------------------------------------------
+// |  Functions
+// ----------------------------------------------------------------------------
+
+
+function scan(p_OnSuccess, p_OnError) {
+  exec(p_Result => {
+    p_OnSuccess(p_Result[0]);
+  }, p_OnError, 'cordova-plugin-mlkit-barcode-scanner','scan');
+};
