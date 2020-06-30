@@ -21,6 +21,9 @@
 
 
     <platform name="ios">
+        <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
+			<string>This app needs access to the camera to take photos.</string>
+		</config-file>
         <config-file target="config.xml" parent="/*">
             <feature name="BarCodeScannerPlugin">
                 <param name="ios-package" value="BarCodeScannerPlugin" />
@@ -28,7 +31,18 @@
             </feature>
         </config-file>
 
+        <podspec>
+            <config>
+                <source url="https://github.com/CocoaPods/Specs.git"/>
+            </config>
+            <pods>
+                <pod name="GoogleMLKit/BarcodeScanning"/>
+            </pods>
+        </podspec>
+        <source-file src="src/ios/CameraViewController.swift" />
         <source-file src="src/ios/BarCodeScannerPlugin.swift" />
+        <source-file src="src/ios/UIUtilities.swift" />
+
     </platform>
 
 

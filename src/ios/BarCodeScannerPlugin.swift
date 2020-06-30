@@ -7,16 +7,42 @@
 
 import Foundation
 
-@objc(BarCodeScannerPlugin) class BarCodeScannerPlugin : CDVPlugin { // Declare the namespace you want to expose to cordova, when you call the Plugin
-  @objc(show:) // Declare the function that you want to expose to cordova, when you call the function (plugin.functionName)
-  func show(command: CDVInvokedUrlCommand) { // write the function.
-    
-    // Assume that the plugin is going to fail (even if in this example, it can't).
-    var pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR);
+let cameraManager = CameraViewController()
+var parentView: UIView? = nil;
+var view = UIView(frame: parentView!.bounds);
+var cameraStarted: Bool = false;
+var callbackId:String=""
 
-    pluginResult = CDVPluginResult(status: CDVCommandStatus_OK); // Set the plugin result to send back to the client.js file.
-    print("The BarCodeScannerPlugin test function ran correctly!"); // Just for giggles.
-    self.commandDelegate!.send(pluginResult, callbackId: command.callbackId); // Send the function result back to cordova.
-  }
+@objc(BarCodeScannerPlugin) class BarCodeScannerPlugin : CDVPlugin, CameraViewControllerDelegate {
+    
+    @objc(sendResult:)
+    func sendResult(result:String) {
+        var pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR);
+        
+        
+        pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: result);
+        self.commandDelegate!.send(pluginResult, callbackId: callbackId);
+    }
+    
+    @objc(scan:)
+    func scan(command: CDVInvokedUrlCommand) {
+        var pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR);
+        
+        callbackId = command.callbackId
+
+        cameraManager.delegate = self
+        
+        UIApplication.shared.isIdleTimerDisabled = true
+        
+        let navigationController = UINavigationController(rootViewController: cameraManager)
+        navigationController.modalPresentationStyle = .fullScreen
+        viewController.present(navigationController, animated: true)
+        
+        cameraStarted = true;
+
+        pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: cameraManager.resultsText);
+        self.commandDelegate!.send(pluginResult, callbackId: command.callbackId);
+    }
+    
 }
 
