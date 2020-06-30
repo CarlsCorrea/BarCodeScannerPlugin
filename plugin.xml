@@ -25,7 +25,7 @@
 			<string>This app needs access to the camera to take photos.</string>
 		</config-file>
         <config-file target="config.xml" parent="/*">
-            <feature name="BarCodeScannerPlugin">
+            <feature name="cordova-plugin-mlkit-barcode-scanner">
                 <param name="ios-package" value="BarCodeScannerPlugin" />
                 <param name="onload" value="true" />
             </feature>
