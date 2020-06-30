@@ -8,6 +8,14 @@ BarCodeScannerPlugin.prototype.scan = function(successCallback, errorCallback) {
   cordova.exec(successCallback, errorCallback, 'BarCodeScannerPlugin', 'scan', [options]);
 }
 
+function successCallback(myString){
+  alert(myString);
+}
+
+function errorCallback(error){
+  alert(JSON.stringify(error));
+}
+
 // Installation constructor that binds ToastyPlugin to window
 BarCodeScannerPlugin.install = function() {
   if (!window.plugins) {
