@@ -51,18 +51,15 @@
                     android:name="com.google.mlkit.vision.DEPENDENCIES"
                     android:value="barcode" />
 
-            <activity android:screenOrientation="portrait" android:label="BASE" android:name="com.carlscorrea.cordova.plugin.BaseCameraActivity"/>
-            <activity android:screenOrientation="portrait" android:label="Read Barcode" android:name="com.carlscorrea.cordova.plugin.BarCodeCaptureActivity" android:theme="@style/Theme.AppCompat.Light"/>
+            <activity android:screenOrientation="portrait" android:label="Read Barcode" android:name="com.carlscorrea.cordova.plugin.BarcodeScannerActivity" android:theme="@style/Theme.AppCompat.Light"/>
         
 
         </config-file>
 
         <source-file src="src/android/src/barCodeScanner/BarCodeScannerPlugin.java" target-dir="src/com/carlscorrea/cordova/plugin" />
-        <source-file src="src/android/src/barCodeScanner/BaseCameraActivity.java" target-dir="src/com/carlscorrea/cordova/plugin" />
-        <source-file src="src/android/src/barCodeScanner/BarCodeCaptureActivity.java" target-dir="src/com/carlscorrea/cordova/plugin" />
+        <source-file src="src/android/src/barCodeScanner/BarcodeScannerActivity.java" target-dir="src/com/carlscorrea/cordova/plugin" />
 
         <resource-file src="src/android/res/layout/carlscorrea_base_camera.xml" target="res/layout/carlscorrea_base_camera.xml"/>
-        <resource-file src="src/android/res/layout/carlscorrea_barcode_capture.xml" target="res/layout/carlscorrea_barcode_capture.xml"/>
 
         <framework src="androidx.appcompat:appcompat:1.0.0"/>
         <framework src="com.google.mlkit:barcode-scanning:16.0.0" />
