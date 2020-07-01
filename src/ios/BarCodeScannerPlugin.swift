@@ -22,6 +22,8 @@ var callbackId:String=""
         
         pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: result);
         self.commandDelegate!.send(pluginResult, callbackId: callbackId);
+
+        viewController.dismiss(animated: true, completion: nil)
     }
     
     @objc(scan:)
