@@ -19,8 +19,8 @@
         <clobbers target="cordova.plugins.scanner"/>
     </js-module>
 
-
     <platform name="ios">
+        <preference name="SwiftVersion" default="5.1" />
         <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
 			<string>This app needs access to the camera to take photos.</string>
 		</config-file>
@@ -31,14 +31,8 @@
             </feature>
         </config-file>
 
-        <podspec>
-            <config>
-                <source url="https://github.com/CocoaPods/Specs.git"/>
-            </config>
-            <pods>
-                <pod name="GoogleMLKit/BarcodeScanning"/>
-            </pods>
-        </podspec>
+        <framework src="GoogleMLKit/BarcodeScanning" type="podspec" spec="~> 0.61.0" />
+
         <source-file src="src/ios/CameraViewController.swift" />
         <source-file src="src/ios/BarCodeScannerPlugin.swift" />
         <source-file src="src/ios/UIUtilities.swift" />
