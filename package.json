@@ -1,0 +1,36 @@
+{
+  "name": "cordova-plugin-barcodescannerplugin",
+  "version": "0.0.1",
+  "description": "scanner ",
+  "cordova": {
+    "id": "cordova-plugin-barcodescannerplugin",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CarlsCorrea/BarCodeScannerPlugin.git"
+  },
+  "keywords": [
+    "ecosystem:cordova"
+  ],
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=3.0.0"
+    }
+  ],
+  "authors": [
+    {
+      "author1" : "Carlos Correa <carlscorrea@gmail.com>",
+      "author2" : "Pedro Vieira <pmfv93@gmail.com>"
+    }
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CarlsCorrea/BarCodeScannerPlugin/issues"
+  },
+  "homepage": "https://github.com/CarlsCorrea/BarCodeScannerPlugin"
+}
