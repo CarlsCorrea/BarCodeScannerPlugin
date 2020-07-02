@@ -17,19 +17,15 @@ var callbackId:String=""
     @objc(sendResult:error:)
     func sendResult(result:String,error:String) {
         var pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR);
-        
         if error.isEmpty {
             let resultArray = [result]
-            pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAsMultipart: resultArray);
+            pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: resultArray)
         } else {
             let resultErrorArray = [error]
-            pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAsMultipart: resultErrorArray);
+            pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: resultErrorArray);
         }
-        
-        pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: result);
         self.commandDelegate!.send(pluginResult, callbackId: callbackId);
         
-    
         viewController.dismiss(animated: true, completion: nil)
     }
     
