@@ -98,7 +98,15 @@ public class BarcodeScannerActivity extends AppCompatActivity {
             String raw = barcode.getRawValue();
             Intent data = new Intent();
             data.putExtra(BarcodeObject, raw);
-            setResult(CommonStatusCodes.SUCCESS, data);
+
+            if(raw.length() != 0){
+
+                setResult(CommonStatusCodes.SUCCESS, data);
+            }
+            else{
+
+                setResult(CommonStatusCodes.ERROR, data);
+            }
 
             finish();
         }
