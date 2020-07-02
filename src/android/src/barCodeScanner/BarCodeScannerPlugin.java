@@ -2,6 +2,7 @@ package com.carlscorrea.cordova.plugin;
 // The native Toast API
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
 // Cordova-required packages
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -15,6 +16,9 @@ import org.apache.cordova.CordovaInterface;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.Console;
+
 public class BarCodeScannerPlugin extends CordovaPlugin {
 
     private  static int BARCODE_REQ = 9001;
@@ -41,17 +45,24 @@ public class BarCodeScannerPlugin extends CordovaPlugin {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
-        if(requestCode == BARCODE_REQ && resultCode == CommonStatusCodes.SUCCESS && data != null){
+        if(requestCode == BARCODE_REQ){
+            if(resultCode == CommonStatusCodes.SUCCESS && data != null){
 
             JSONArray result = new JSONArray();
             //BARCODE RESULT GOES IN THE ARRAY
-            result.put(data.getStringExtra(BarcodeScannerActivity.BarcodeObject));
+            String raw = data.getStringExtra(BarcodeScannerActivity.BarcodeObject);
+            result.put(raw);
+            Log.d("barcodeDEBUG","RAW obj: " + raw);
             _callCallbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, result));
-        }
-        else {
+            }
+
+            else {
             JSONArray result = new JSONArray();
             result.put("err");
+            Log.e("BarcodeScannerError", "Error on act result");
             _callCallbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, result));
+            }
+
         }
     }
 
