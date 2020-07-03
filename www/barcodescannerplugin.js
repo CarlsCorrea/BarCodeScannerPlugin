@@ -51,9 +51,6 @@ function scan(p_OnSuccess, p_OnError, p_Settings) {
   }
 
 
-
-  
-
   var settingArray = [
     camerafacing,
     flash,
