@@ -50,6 +50,10 @@ function scan(p_OnSuccess, p_OnError, p_Settings) {
     drawline = 1;
   }
 
+
+
+  
+
   var settingArray = [
     camerafacing,
     flash,
