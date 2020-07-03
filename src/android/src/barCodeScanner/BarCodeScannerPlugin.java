@@ -50,6 +50,7 @@ public class BarCodeScannerPlugin extends CordovaPlugin {
 
             JSONArray result = new JSONArray();
             //BARCODE RESULT GOES IN THE ARRAY
+            //CENAS E COISAS
             String raw = data.getStringExtra(BarcodeScannerActivity.BarcodeObject);
             result.put(raw);
             Log.d("barcodeDEBUG","RAW obj: " + raw);
