@@ -6,6 +6,9 @@ var exec = require('cordova/exec');
 // ----------------------------------------------------------------------------
 // |  Public interface
 // ----------------------------------------------------------------------------
+exports.getDefaultSettings = function() {
+  return getDefaultSettings();
+};
 
 exports.scan = function (p_OnSuccess, p_OnError, p_Settings) {
   if (!p_Settings) {
@@ -21,15 +24,9 @@ exports.scan = function (p_OnSuccess, p_OnError, p_Settings) {
 
 function getDefaultSettings() {
   var settings = {
-    lens: {
-      facing : back
-    },
-    flash: {
-      on : false
-    },
-    canvas: {
-      drawline : false
-    }
+    lens: "back",
+    flash: false,
+    canvas: false
   }; 
 
   return settings;
@@ -40,23 +37,15 @@ function scan(p_OnSuccess, p_OnError, p_Settings) {
    var flash = 0;
    var drawline = 0;
 
-   if(p_Settings.lens[0] === front){
+   if(p_Settings.lens === "front"){
      camerafacing = 1;
    }
-   if(p_Settings.flash[0] === true){
+   if(p_Settings.flash === true){
     flash = 1;
   }
-  if(p_Settings.canvas[0] === true){
+  if(p_Settings.canvas === true){
     drawline = 1;
   }
-
-
-
-
-
-
-
-  
 
   var settingArray = [
     camerafacing,
