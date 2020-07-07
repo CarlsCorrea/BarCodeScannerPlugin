@@ -118,21 +118,6 @@ class CameraViewController: UIViewController {
         let leftButton = UIBarButtonItem(customView: leftBtn)
         self.navigationItem.leftBarButtonItem = leftButton
         
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(didInterrupted),
-                                               name: .AVCaptureSessionWasInterrupted,
-                                               object: captureSession)
-        
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(didStarted),
-                                               name: .AVCaptureSessionDidStartRunning,
-                                               object: captureSession)
-        
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(retrieveError),
-                                               name: .AVCaptureSessionRuntimeError,
-                                               object: captureSession)
-        
         self.previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer.videoGravity = .resizeAspectFill
         self.view.layer.addSublayer(previewLayer)
@@ -149,21 +134,6 @@ class CameraViewController: UIViewController {
         
         isFrontCamera = (self.lens == 1)
         
-    }
-
-    @objc
-    func retrieveError() {
-        print("retrieveError: \(captureSession.debugDescription)")
-    }
-    
-    @objc
-    func didStarted() {
-        print("started: \(captureSession.isRunning)")
-    }
-    
-    @objc
-    func didInterrupted() {
-        print("didInterrupted: \(captureSession.isInterrupted)")
     }
     
     private func setUpPreviewOverlayView() {
@@ -223,12 +193,10 @@ class CameraViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         startSession()
-        
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-
         stopSession()
     }
     
@@ -323,7 +291,6 @@ class CameraViewController: UIViewController {
             self.removeDetectionAnnotations()
         }
         guard !barcodes.isEmpty else {
-            print("Barcode scanner returrned no results.")
             return
         }
         DispatchQueue.main.sync {
@@ -363,12 +330,7 @@ class CameraViewController: UIViewController {
 
 @objc(CameraViewController)
 extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
-    
-    @objc
-    func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        print("passou")
-    }
-    
+
     @objc
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
@@ -412,7 +374,6 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
     
 }
-
 
 private enum Constant {
     static let sessionQueueLabel = "com.google.mlkit.visiondetector.SessionQueue"
