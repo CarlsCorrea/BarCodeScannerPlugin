@@ -41,6 +41,8 @@ class CameraViewController: UIViewController {
     
     var resultsText = ""
     var resultBarcodeError = ""
+    var lens:Int = 0
+    var canvas:Int = 0
     
     private lazy var previewOverlayView: UIImageView = {
         precondition(isViewLoaded)
@@ -137,9 +139,16 @@ class CameraViewController: UIViewController {
         
         setUpPreviewOverlayView()
         setUpAnnotationOverlayView()
-        setUpTargetOverlayView()
+        
+        if (self.canvas == 1) {
+            setUpTargetOverlayView()
+        }
+        
         setUpCaptureSessionInput()
         setUpCaptureSessionOutput()
+        
+        isFrontCamera = (self.lens == 1)
+        
     }
 
     @objc

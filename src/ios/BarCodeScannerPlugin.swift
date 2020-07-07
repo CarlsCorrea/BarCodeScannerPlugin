@@ -34,10 +34,11 @@ var callbackId:String=""
     func scan(command: CDVInvokedUrlCommand) {
         callbackId = command.callbackId
         
-        let x:Int = command.arguments![0] as! Int;
-        let y:Int = command.arguments![1] as! Int;
-        let width:Int = command.arguments![2] as! Int;
-        let height:Int = command.arguments![3] as! Int;
+        let lens:Int = command.arguments![0] as! Int;
+        let canvas:Int = command.arguments![1] as! Int;
+        
+        cameraManager.lens = lens
+        cameraManager.canvas = canvas
         
         cameraManager.delegate = self
         UIApplication.shared.isIdleTimerDisabled = true
@@ -47,8 +48,6 @@ var callbackId:String=""
         navigationController.isNavigationBarHidden = true
         
         viewController.present(navigationController, animated: true)
-        
-        
     
     }
     

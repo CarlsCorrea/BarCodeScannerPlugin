@@ -25,7 +25,6 @@ exports.scan = function (p_OnSuccess, p_OnError, p_Settings) {
 function getDefaultSettings() {
   var settings = {
     lens: "back",
-    flash: false,
     canvas: false
   }; 
 
@@ -34,22 +33,17 @@ function getDefaultSettings() {
 function scan(p_OnSuccess, p_OnError, p_Settings) {
 
    var camerafacing = 0;
-   var flash = 0;
    var drawline = 0;
 
    if(p_Settings.lens === "front"){
      camerafacing = 1;
    }
-   if(p_Settings.flash === true){
-    flash = 1;
-  }
   if(p_Settings.canvas === true){
     drawline = 1;
   }
 
   var settingArray = [
     camerafacing,
-    flash,
     drawline
   ];
 
