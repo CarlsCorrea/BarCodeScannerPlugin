@@ -17,6 +17,7 @@ var callbackId:String=""
     @objc(sendResult:error:)
     func sendResult(result:String,error:String) {
         var pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR);
+        
         if error.isEmpty {
             let resultArray = [result]
             pluginResult = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: resultArray)
@@ -33,14 +34,24 @@ var callbackId:String=""
     func scan(command: CDVInvokedUrlCommand) {
         callbackId = command.callbackId
         
+        let lens:Int = command.arguments![0] as! Int;
+        let canvas:Int = command.arguments![1] as! Int;
+        
+        cameraManager.lens = lens
+        cameraManager.canvas = canvas
+        
         cameraManager.delegate = self
         UIApplication.shared.isIdleTimerDisabled = true
         
         let navigationController = UINavigationController(rootViewController: cameraManager)
         navigationController.modalPresentationStyle = .fullScreen
-        navigationController.setNavigationBarHidden(true, animated: false)
+        navigationController.isNavigationBarHidden = true
+        
         viewController.present(navigationController, animated: true)
+    
     }
+    
+
     
 }
 
