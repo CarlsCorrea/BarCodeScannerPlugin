@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
@@ -14,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.camerakit.CameraKit;
 import com.camerakit.CameraKitView;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -28,16 +30,24 @@ import java.util.List;
 
 public class BarcodeScannerActivity extends AppCompatActivity {
 
-    protected CameraKitView _cameraView;
+    private CameraKitView _cameraView;
+    private View _line;
     private Runnable r;
     private Handler h;
+    private boolean _frontFacingCamera;
+    private boolean _flashEnabled;
+    private boolean _drawLine;
+
     public final static String BarcodeObject = "BarcodeObject";
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(getResources().getIdentifier("carlscorrea_base_camera", "layout", getPackageName()));
         _cameraView = findViewById(getResources().getIdentifier("camera", "id", getPackageName()));
-        _cameraView.setImageMegaPixels(2f);
+        _line = findViewById(getResources().getIdentifier("line","id",getPackageName()));
+
+        getSettings();
+        setOptions();
         if(getSupportActionBar() != null){
             getSupportActionBar().hide();
         }
@@ -63,6 +73,43 @@ public class BarcodeScannerActivity extends AppCompatActivity {
                 h.removeCallbacks(r);
             }
         });
+    }
+
+    private void setOptions(){
+        setCameraOptions();
+        setAddtionalUI();
+    }
+
+    private void setAddtionalUI() {
+        if(_drawLine){
+            _line.setVisibility(View.VISIBLE);
+        }
+        else{
+            _line.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private void setCameraOptions() {
+        _cameraView.setImageMegaPixels(2f);
+        if(_frontFacingCamera){
+            _cameraView.setFacing(CameraKit.FACING_FRONT);
+        }
+        else{
+            _cameraView.setFacing(CameraKit.FACING_BACK);
+        }
+    }
+
+    private void getSettings() {
+        _frontFacingCamera = BooleanToParse(getIntent().getIntExtra("frontFacingCamera",0));
+        _flashEnabled = BooleanToParse(getIntent().getIntExtra("flashEnabled",0));
+        _drawLine = BooleanToParse(getIntent().getIntExtra("drawLine",0));
+    }
+
+    private boolean BooleanToParse(int value) {
+        if(value != 0){
+            return true;
+        }
+        return false;
     }
 
     private void Capture() {
@@ -141,5 +188,12 @@ public class BarcodeScannerActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         _cameraView.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent data = new Intent();
+        data.putExtra(BarcodeObject, "backPressed");
+        finish();
     }
 }
