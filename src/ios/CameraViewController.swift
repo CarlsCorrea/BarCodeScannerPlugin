@@ -13,6 +13,21 @@ protocol CameraViewControllerDelegate: class {
     func sendResult(result:String,error:String)
 }
 
+class CustomView: UIView {
+
+    override func draw(_ rect: CGRect) {
+        super.draw(rect)
+        
+        if let context = UIGraphicsGetCurrentContext() {
+            context.setStrokeColor(UIColor.gray.cgColor)
+            context.setLineWidth(1)
+            context.move(to: CGPoint(x: 0, y: bounds.height))
+            context.addLine(to: CGPoint(x: bounds.width, y: bounds.height))
+            context.strokePath()
+        }
+    }
+}
+
 @objc(CameraViewController)
 class CameraViewController: UIViewController {
     
@@ -26,6 +41,8 @@ class CameraViewController: UIViewController {
     
     var resultsText = ""
     var resultBarcodeError = ""
+    var lens:Int = 0
+    var canvas:Int = 0
     
     private lazy var previewOverlayView: UIImageView = {
         precondition(isViewLoaded)
@@ -42,25 +59,64 @@ class CameraViewController: UIViewController {
         return annotationOverlayView
     }()
     
+    private lazy var targetOverlayView: UIView = {
+        precondition(isViewLoaded)
+        let targetOverlayView = UIView(frame: .zero)
+        targetOverlayView.translatesAutoresizingMaskIntoConstraints = false
+        return targetOverlayView
+    }()
+    
+    @objc func flashTapped() {
+        toggleFlash()
+    }
+    
+    func toggleFlash() {
+        guard let device = AVCaptureDevice.default(for: AVMediaType.video) else { return }
+        guard device.hasTorch else { return }
+
+        do {
+            try device.lockForConfiguration()
+
+            if (device.torchMode == AVCaptureDevice.TorchMode.on) {
+                device.torchMode = AVCaptureDevice.TorchMode.off
+            } else {
+                do {
+                    try device.setTorchModeOn(level: 1.0)
+                } catch {
+                    print(error)
+                }
+            }
+
+            device.unlockForConfiguration()
+        } catch {
+            print(error)
+        }
+    }
+    
+    @objc func closeTapped() {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+            
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
+        self.navigationController?.navigationBar.barStyle = UIBarStyle.default
+        self.navigationController?.navigationBar.barTintColor = UIColor.black
         
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(didInterrupted),
-                                               name: .AVCaptureSessionWasInterrupted,
-                                               object: captureSession)
+        let rightBtn = UIButton(type: .system)
+        rightBtn.setTitle("Close", for: .normal)
+        rightBtn.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(didStarted),
-                                               name: .AVCaptureSessionDidStartRunning,
-                                               object: captureSession)
+        let rightButton = UIBarButtonItem(customView: rightBtn)
+        self.navigationItem.rightBarButtonItem = rightButton
         
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(retrieveError),
-                                               name: .AVCaptureSessionRuntimeError,
-                                               object: captureSession)
+        let leftBtn = UIButton(type: .system)
+        leftBtn.setTitle("Flash", for: .normal)
+        leftBtn.addTarget(self, action: #selector(flashTapped), for: .touchUpInside)
         
-        
+        let leftButton = UIBarButtonItem(customView: leftBtn)
+        self.navigationItem.leftBarButtonItem = leftButton
         
         self.previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer.videoGravity = .resizeAspectFill
@@ -68,23 +124,16 @@ class CameraViewController: UIViewController {
         
         setUpPreviewOverlayView()
         setUpAnnotationOverlayView()
+        
+        if (self.canvas == 1) {
+            setUpTargetOverlayView()
+        }
+        
         setUpCaptureSessionInput()
         setUpCaptureSessionOutput()
-    }
-
-    @objc
-    func retrieveError() {
-        print("retrieveError: \(captureSession.debugDescription)")
-    }
-    
-    @objc
-    func didStarted() {
-        print("started: \(captureSession.isRunning)")
-    }
-    
-    @objc
-    func didInterrupted() {
-        print("didInterrupted: \(captureSession.isInterrupted)")
+        
+        isFrontCamera = (self.lens == 1)
+        
     }
     
     private func setUpPreviewOverlayView() {
@@ -106,22 +155,48 @@ class CameraViewController: UIViewController {
             annotationOverlayView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
         ])
     }
+    
+    private func setUpTargetOverlayView() {
+        self.view.addSubview(targetOverlayView)
+        NSLayoutConstraint.activate([
+            targetOverlayView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            targetOverlayView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            targetOverlayView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            targetOverlayView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+        ])
+        
+        let aPath = UIBezierPath()
+        aPath.move(to: CGPoint(x: 0, y: self.view.frame.height / 2))
+        aPath.addLine(to: CGPoint(x: self.view.frame.width, y: self.view.frame.height / 2))
+        aPath.close()
+
+        UIColor.red.set()
+        aPath.lineWidth = 1
+        aPath.stroke()
+
+        let shapeLayer = CAShapeLayer()
+        shapeLayer.path = aPath.cgPath;
+        shapeLayer.strokeColor = UIColor.red.cgColor;
+        shapeLayer.lineWidth = 1.0;
+        shapeLayer.fillColor = UIColor.clear.cgColor;
+        
+        targetOverlayView.layer.addSublayer(shapeLayer)
+    }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
         self.previewLayer.frame = self.view.frame;
         self.previewLayer.position = CGPoint(x: self.previewLayer.frame.midX, y: self.previewLayer.frame.midY);
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         startSession()
-        
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-
         stopSession()
     }
     
@@ -216,7 +291,6 @@ class CameraViewController: UIViewController {
             self.removeDetectionAnnotations()
         }
         guard !barcodes.isEmpty else {
-            print("Barcode scanner returrned no results.")
             return
         }
         DispatchQueue.main.sync {
@@ -256,12 +330,7 @@ class CameraViewController: UIViewController {
 
 @objc(CameraViewController)
 extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
-    
-    @objc
-    func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        print("passou")
-    }
-    
+
     @objc
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
@@ -305,7 +374,6 @@ extension CameraViewController: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
     
 }
-
 
 private enum Constant {
     static let sessionQueueLabel = "com.google.mlkit.visiondetector.SessionQueue"
