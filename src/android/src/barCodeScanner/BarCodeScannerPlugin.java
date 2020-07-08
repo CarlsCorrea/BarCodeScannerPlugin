@@ -51,6 +51,9 @@ public class BarCodeScannerPlugin extends CordovaPlugin {
             JSONArray result = new JSONArray();
             //BARCODE RESULT GOES IN THE ARRAY
             String raw = data.getStringExtra(BarcodeScannerActivity.BarcodeObject);
+            if(raw == "backPressed"){
+                raw = "";
+            }
             result.put(raw);
             Log.d("barcodeDEBUG","RAW obj: " + raw);
             _callCallbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, result));
@@ -68,7 +71,11 @@ public class BarCodeScannerPlugin extends CordovaPlugin {
 
     public void StartBarCodeActivity(Context context, JSONArray args){
         cordova.setActivityResultCallback(this);
-        cordova.startActivityForResult(this,new Intent(context, BarcodeScannerActivity.class), BARCODE_REQ);
+        Intent intent = new Intent(context, BarcodeScannerActivity.class);
+        intent.putExtra("frontFacingCamera", args.optInt(0,0));
+        intent.putExtra("flashEnabled", args.optInt(1,0));
+        intent.putExtra("drawLine", args.optInt(2,0));
+        cordova.startActivityForResult(this, intent, BARCODE_REQ);
     }
 
     private class StartBarCodeTask implements Runnable {
