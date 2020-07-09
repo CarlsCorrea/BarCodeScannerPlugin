@@ -45,20 +45,23 @@ public class BarCodeScannerPlugin extends CordovaPlugin {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
+        Log.e("BARCODEREQCODE", ""+ requestCode);
         if(requestCode == BARCODE_REQ){
-            if(resultCode == CommonStatusCodes.SUCCESS && data != null){
+            Log.e("RESULTCODE", ""+ resultCode);
+            boolean isDataNull = data == null;
+            Log.e("DATA", ""+ isDataNull);
 
-            JSONArray result = new JSONArray();
-            //BARCODE RESULT GOES IN THE ARRAY
-            String raw = data.getStringExtra(BarcodeScannerActivity.BarcodeObject);
-            if(raw == "backPressed"){
-                raw = "";
-            }
-            result.put(raw);
-            Log.d("barcodeDEBUG","RAW obj: " + raw);
-            _callCallbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, result));
-            }
+            if(resultCode == CommonStatusCodes.SUCCESS){
+                if(data != null){
 
+                    JSONArray result = new JSONArray();
+                    //BARCODE RESULT GOES IN THE ARRAY
+                    String raw = data.getStringExtra(BarcodeScannerActivity.BarcodeObject);
+                    result.put(raw);
+                    Log.d("barcodeDEBUG","RAW obj: " + raw);
+                    _callCallbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, result));
+                }
+            }
             else {
             JSONArray result = new JSONArray();
             result.put("err");
