@@ -13,37 +13,23 @@ protocol CameraViewControllerDelegate: class {
     func sendResult(result:String,error:String)
 }
 
-class CustomView: UIView {
-
-    override func draw(_ rect: CGRect) {
-        super.draw(rect)
-        
-        if let context = UIGraphicsGetCurrentContext() {
-            context.setStrokeColor(UIColor.gray.cgColor)
-            context.setLineWidth(1)
-            context.move(to: CGPoint(x: 0, y: bounds.height))
-            context.addLine(to: CGPoint(x: bounds.width, y: bounds.height))
-            context.strokePath()
-        }
-    }
-}
-
 @objc(CameraViewController)
 class CameraViewController: UIViewController {
     
     private var previewLayer: AVCaptureVideoPreviewLayer!
     private lazy var captureSession = AVCaptureSession()
     private lazy var sessionQueue = DispatchQueue(label: Constant.sessionQueueLabel, qos: .background)
-    private var isFrontCamera = false
+    var isFrontCamera = false
     private var lastFrame: CMSampleBuffer?
     
     weak var delegate: CameraViewControllerDelegate?
     
     var resultsText = ""
     var resultBarcodeError = ""
-    var lens:Int = 0
-    var canvas:Int = 0
-    
+    var lens:Bool=false
+    var canvas:Bool=false
+    var flash:Bool=false
+
     private lazy var previewOverlayView: UIImageView = {
         precondition(isViewLoaded)
         let previewOverlayView = UIImageView(frame: .zero)
@@ -92,51 +78,17 @@ class CameraViewController: UIViewController {
             print(error)
         }
     }
-    
-    @objc func closeTapped() {
-        self.dismiss(animated: true, completion: nil)
-    }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
             
-        self.navigationController?.setNavigationBarHidden(false, animated: true)
-        self.navigationController?.navigationBar.barStyle = UIBarStyle.default
-        self.navigationController?.navigationBar.barTintColor = UIColor.black
-        
-        let rightBtn = UIButton(type: .system)
-        rightBtn.setTitle("Close", for: .normal)
-        rightBtn.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
-        
-        let rightButton = UIBarButtonItem(customView: rightBtn)
-        self.navigationItem.rightBarButtonItem = rightButton
-        
-        let leftBtn = UIButton(type: .system)
-        leftBtn.setTitle("Flash", for: .normal)
-        leftBtn.addTarget(self, action: #selector(flashTapped), for: .touchUpInside)
-        
-        let leftButton = UIBarButtonItem(customView: leftBtn)
-        self.navigationItem.leftBarButtonItem = leftButton
-        
-        self.previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        self.previewLayer = AVCaptureVideoPreviewLayer(session: cameraManager.captureSession)
         previewLayer.videoGravity = .resizeAspectFill
         self.view.layer.addSublayer(previewLayer)
         
-        setUpPreviewOverlayView()
-        setUpAnnotationOverlayView()
-        
-        if (self.canvas == 1) {
-            setUpTargetOverlayView()
-        }
-        
-        setUpCaptureSessionInput()
-        setUpCaptureSessionOutput()
-        
-        isFrontCamera = (self.lens == 1)
-        
     }
     
-    private func setUpPreviewOverlayView() {
+    func setUpPreviewOverlayView() {
         self.view.addSubview(previewOverlayView)
         NSLayoutConstraint.activate([
             previewOverlayView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
@@ -146,7 +98,7 @@ class CameraViewController: UIViewController {
         ])
     }
 
-    private func setUpAnnotationOverlayView() {
+    func setUpAnnotationOverlayView() {
         self.view.addSubview(annotationOverlayView)
         NSLayoutConstraint.activate([
             annotationOverlayView.topAnchor.constraint(equalTo: self.view.topAnchor),
@@ -156,7 +108,7 @@ class CameraViewController: UIViewController {
         ])
     }
     
-    private func setUpTargetOverlayView() {
+    func setUpTargetOverlayView() {
         self.view.addSubview(targetOverlayView)
         NSLayoutConstraint.activate([
             targetOverlayView.topAnchor.constraint(equalTo: self.view.topAnchor),
@@ -192,7 +144,11 @@ class CameraViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        startSession()
+        
+        if (self.canvas) {
+            setUpTargetOverlayView()
+        }
+     
     }
 
     override func viewDidDisappear(_ animated: Bool) {
@@ -200,19 +156,24 @@ class CameraViewController: UIViewController {
         stopSession()
     }
     
-    private func startSession() {
+    func startSession() {
         sessionQueue.async{
-        self.captureSession.startRunning()
-      }
+            self.captureSession.commitConfiguration()
+            self.captureSession.startRunning()
+            
+            if (self.flash) {
+                self.toggleFlash()
+            }
+        }
     }
 
-    private func stopSession() {
+    func stopSession() {
       sessionQueue.async {
         self.captureSession.stopRunning()
       }
     }
         
-    private func setUpCaptureSessionOutput() {
+    func setUpCaptureSessionOutput() {
         sessionQueue.async {
             self.captureSession.beginConfiguration()
             self.captureSession.sessionPreset = AVCaptureSession.Preset.medium
@@ -231,13 +192,14 @@ class CameraViewController: UIViewController {
         }
     }
     
-    private func setUpCaptureSessionInput() {
+    func setUpCaptureSessionInput() {
         sessionQueue.async {
             let cameraPosition: AVCaptureDevice.Position = self.isFrontCamera ? .front : .back
             guard let device = self.captureDevice(forPosition: cameraPosition) else {
                 print("Failed to get capture device for camera position: \(cameraPosition)")
                 return
             }
+            
             do {
                 self.captureSession.beginConfiguration()
                 let currentInputs = self.captureSession.inputs
