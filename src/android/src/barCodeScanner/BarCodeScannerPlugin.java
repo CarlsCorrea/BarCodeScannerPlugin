@@ -73,8 +73,8 @@ public class BarCodeScannerPlugin extends CordovaPlugin {
         cordova.setActivityResultCallback(this);
         Intent intent = new Intent(context, BarcodeScannerActivity.class);
         intent.putExtra("frontFacingCamera", args.optInt(0,0));
-        intent.putExtra("flashEnabled", args.optInt(1,0));
-        intent.putExtra("drawLine", args.optInt(2,0));
+        intent.putExtra("drawLine", args.optInt(1,0));
+        intent.putExtra("flashEnabled", args.optInt(2,0));
         cordova.startActivityForResult(this, intent, BARCODE_REQ);
     }
 

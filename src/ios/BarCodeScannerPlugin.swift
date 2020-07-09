@@ -36,6 +36,7 @@ var callbackId:String=""
         
         let lens:Int = command.arguments![0] as! Int;
         let canvas:Int = command.arguments![1] as! Int;
+        let flash:Int = command.arguments![2] as! Int;
         
         cameraManager.lens = lens
         cameraManager.canvas = canvas
