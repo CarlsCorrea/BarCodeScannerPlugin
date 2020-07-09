@@ -1,12 +1,15 @@
 package com.carlscorrea.cordova.plugin;
 
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -14,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.camerakit.CameraKit;
 import com.camerakit.CameraKitView;
@@ -62,17 +66,6 @@ public class BarcodeScannerActivity extends AppCompatActivity {
             }
         };
 
-        _cameraView.setPreviewListener(new CameraKitView.PreviewListener() {
-            @Override
-            public void onStart() {
-                h.postDelayed(r,0);
-            }
-
-            @Override
-            public void onStop() {
-                h.removeCallbacks(r);
-            }
-        });
     }
 
     private void setOptions(){
@@ -81,11 +74,14 @@ public class BarcodeScannerActivity extends AppCompatActivity {
     }
 
     private void setAddtionalUI() {
+
+        Log.e("BARCODEACT", "_drawLine:" + _drawLine);
         if(_drawLine){
             _line.setVisibility(View.VISIBLE);
         }
         else{
-            _line.setVisibility(View.INVISIBLE);
+            Log.e("BARCODEACT", "Line is beings set to invis");
+            _line.setVisibility(View.GONE);
         }
     }
 
@@ -141,7 +137,6 @@ public class BarcodeScannerActivity extends AppCompatActivity {
 
     private void Scan(List<Barcode> barcodes) {
         for (Barcode barcode: barcodes) {
-
             String raw = barcode.getRawValue();
             Intent data = new Intent();
             data.putExtra(BarcodeObject, raw);
@@ -155,6 +150,7 @@ public class BarcodeScannerActivity extends AppCompatActivity {
                 setResult(CommonStatusCodes.ERROR, data);
             }
 
+            Log.e("SCANNERFINISHED", "sending result");
             finish();
         }
     }
@@ -162,25 +158,45 @@ public class BarcodeScannerActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Log.e("BARCODEACT", "OnStart");
         _cameraView.onStart();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        Log.e("BARCODEACT", "OnResume");
         _cameraView.onResume();
+        _cameraView.setPreviewListener(new CameraKitView.PreviewListener() {
+            @Override
+            public void onStart() {
+                h.postDelayed(r,0);
+            }
+
+            @Override
+            public void onStop() {
+                h.removeCallbacks(r);
+            }
+        });
+        _line= findViewById(getResources().getIdentifier("line", "id",getPackageName()));
+        setAddtionalUI();
     }
 
     @Override
     protected void onPause() {
+        _cameraView.removeCameraListener();
         _cameraView.onPause();
+        Log.e("BARCODEACT", "OnPause");
         super.onPause();
     }
 
     @Override
     protected void onStop() {
         _cameraView.onStop();
+        Log.e("BARCODEACT", "OnStop");
         super.onStop();
+        finish();
     }
 
 
@@ -192,8 +208,8 @@ public class BarcodeScannerActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Intent data = new Intent();
-        data.putExtra(BarcodeObject, "backPressed");
+        setResult(CommonStatusCodes.SUCCESS);
+        Log.e("BackPRESSED", "userpressed back");
         finish();
     }
 }

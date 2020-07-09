@@ -2,26 +2,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent"
     android:layout_width="match_parent">
+
     <com.camerakit.CameraKitView
         android:id="@+id/camera"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:adjustViewBounds="true"
+        android:layout_height="match_parent"
         android:keepScreenOn="true"
-        app:camera_flash="auto"
-        app:camera_facing="back"
         app:camera_focus="continuous"
+        android:adjustViewBounds="true"
         app:camera_permissions="camera" />
-    <FrameLayout
+    <View
+        android:id="@+id/line"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <View
-            android:id="@+id/line"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#EE0000"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_gravity="center"/>
-    </FrameLayout>
+        android:layout_height="1dp"
+        android:background="#EE0000"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_gravity="center"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
