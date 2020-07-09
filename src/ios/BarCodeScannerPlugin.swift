@@ -46,7 +46,6 @@ var callbackId:String=""
         
         let navigationController = UINavigationController(rootViewController: cameraManager)
         navigationController.modalPresentationStyle = .fullScreen
-        navigationController.isNavigationBarHidden = true
         
         viewController.present(navigationController, animated: true)
     
