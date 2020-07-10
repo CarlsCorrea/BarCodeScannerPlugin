@@ -49,10 +49,7 @@
             </feature>
         </config-file>
 
-        <config-file parent="/*" target="app/src/main/AndroidManifest.xml">
-            <uses-permission android:name="android.permission.CAMERA" />
-        </config-file>
-
+      
         <config-file parent="application" target="app/src/main/AndroidManifest.xml">
             <meta-data
                     android:name="com.google.android.gms.version"
@@ -61,13 +58,22 @@
                     android:name="com.google.mlkit.vision.DEPENDENCIES"
                     android:value="barcode" />
 
-            <activity android:screenOrientation="portrait" android:label="Read Barcode" android:name="com.carlscorrea.cordova.plugin.BarcodeScannerActivity" android:theme="@style/Theme.AppCompat.Light"/>
+            <activity android:noHistory="true" android:screenOrientation="portrait" android:label="Read Barcode" android:name="com.carlscorrea.cordova.plugin.BarcodeScannerActivity" android:theme="@style/Theme.AppCompat.Light"/>
         
 
         </config-file>
 
+
+        <config-file parent="/*" target="app/src/main/AndroidManifest.xml">
+            <uses-permission android:name="android.permission.CAMERA" />
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+            <uses-feature android:name="android.hardware.camera" />
+            <uses-feature android:name="android.hardware.camera.front"/>
+        </config-file>
+
         <source-file src="src/android/src/barCodeScanner/BarCodeScannerPlugin.java" target-dir="src/com/carlscorrea/cordova/plugin" />
         <source-file src="src/android/src/barCodeScanner/BarcodeScannerActivity.java" target-dir="src/com/carlscorrea/cordova/plugin" />
+        <source-file src="src/android/src/barCodeScanner/BarcodePreviewListener.java" target-dir="src/com/carlscorrea/cordova/plugin"/>
 
         <resource-file src="src/android/res/layout/carlscorrea_base_camera.xml" target="res/layout/carlscorrea_base_camera.xml"/>
 
