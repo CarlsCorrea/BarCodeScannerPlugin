@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.hardware.camera2.CameraManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.camerakit.CameraKit;
@@ -29,10 +31,11 @@ import com.google.mlkit.vision.barcode.Barcode;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.common.InputImage;
+import com.jpegkit.Jpeg;
 
 import java.util.List;
 
-public class BarcodeScannerActivity extends AppCompatActivity {
+public class BarcodeScannerActivity extends AppCompatActivity{
 
     private CameraKitView _cameraView;
     private View _line;
@@ -41,8 +44,10 @@ public class BarcodeScannerActivity extends AppCompatActivity {
     private boolean _frontFacingCamera;
     private boolean _flashEnabled;
     private boolean _drawLine;
+    private BarcodePreviewListener _listener;
 
     public final static String BarcodeObject = "BarcodeObject";
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,12 +66,15 @@ public class BarcodeScannerActivity extends AppCompatActivity {
         r = new Runnable() {
             @Override
             public void run() {
+                Log.e("BARCODETHREAD", "Started capturing");
                 Capture();
-                h.postDelayed(r, 1000);
+                Log.e("BARCODETHREAD", "Finished capturing");
             }
         };
 
+        _listener = new BarcodePreviewListener(this);
     }
+
 
     private void setOptions(){
         setCameraOptions();
@@ -93,6 +101,9 @@ public class BarcodeScannerActivity extends AppCompatActivity {
         else{
             _cameraView.setFacing(CameraKit.FACING_BACK);
         }
+      // if(_flashEnabled){
+      //     _cameraView.setFlash(CameraKit.FLASH_ON);
+      // }
     }
 
     private void getSettings() {
@@ -113,14 +124,16 @@ public class BarcodeScannerActivity extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onImage(CameraKitView cameraKitView, byte[] bytes) {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0, bytes.length);
-                //assuming at this point a portrait orientation
-                InputImage input = InputImage.fromBitmap(bitmap, 90);
+                Log.d("BarcodeScanner", "capturing");
+
+               InputImage image = InputImage.fromBitmap(BitmapFactory.decodeByteArray(bytes,0,bytes.length),90);
                 BarcodeScanner scanner = BarcodeScanning.getClient();
-                Task<List<Barcode>> result = scanner.process(input)
+                Task<List<Barcode>> result = scanner.process(image)
                     .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
                         @Override
                         public void onSuccess(List<Barcode> barcodes) {
+                            Log.d("BarcodeScanner", "Success");
+                            Log.e("BARCODETHREAD", "StartScan");
                             Scan(barcodes);
                         }
                     })
@@ -128,6 +141,10 @@ public class BarcodeScannerActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             //for now does nothing
+
+                            Log.e("BarcodeScanner", e.getMessage());
+
+                            h.postDelayed(r, 0);
                         }
                     });
             }
@@ -136,22 +153,30 @@ public class BarcodeScannerActivity extends AppCompatActivity {
     }
 
     private void Scan(List<Barcode> barcodes) {
-        for (Barcode barcode: barcodes) {
-            String raw = barcode.getRawValue();
-            Intent data = new Intent();
-            data.putExtra(BarcodeObject, raw);
+        Log.d("BARCODEACT", "barcode length:" + barcodes.size());
+        if(barcodes.size() == 0){
 
-            if(raw.length() != 0){
+            h.postDelayed(r, 0);
+        }
+        else {
+            for (Barcode barcode : barcodes) {
 
-                setResult(CommonStatusCodes.SUCCESS, data);
+                Log.d("BarcodeScanner", "processing");
+                String raw = barcode.getRawValue();
+                Intent data = new Intent();
+                data.putExtra(BarcodeObject, raw);
+
+                if (raw.length() != 0) {
+
+                    setResult(CommonStatusCodes.SUCCESS, data);
+                } else {
+
+                    setResult(CommonStatusCodes.ERROR, data);
+                }
+
+                Log.e("SCANNERFINISHED", "sending result");
+                finish();
             }
-            else{
-
-                setResult(CommonStatusCodes.ERROR, data);
-            }
-
-            Log.e("SCANNERFINISHED", "sending result");
-            finish();
         }
     }
 
@@ -166,21 +191,27 @@ public class BarcodeScannerActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        Log.e("BARCODEACT", "OnResume");
-        _cameraView.onResume();
-        _cameraView.setPreviewListener(new CameraKitView.PreviewListener() {
-            @Override
-            public void onStart() {
-                h.postDelayed(r,0);
-            }
+        if(ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED){
+            Log.e("PERMISSION" , "GRANTED");
 
-            @Override
-            public void onStop() {
-                h.removeCallbacks(r);
-            }
-        });
-        _line= findViewById(getResources().getIdentifier("line", "id",getPackageName()));
-        setAddtionalUI();
+            Log.e("BARCODEACT", "OnResume");
+
+            _cameraView.setErrorListener(new CameraKitView.ErrorListener() {
+                @Override
+                public void onError(CameraKitView cameraKitView, CameraKitView.CameraException e) {
+                    Log.e("ONCAMERAKITERROR", e.getMessage());
+                }
+            });
+
+          if(_cameraView.getPreviewListener() == null){
+              _listener = new BarcodePreviewListener(this);
+              _cameraView.setPreviewListener(_listener);
+          }
+            Log.e("BARCODEACT", "PreviewListenerObtained");
+            _cameraView.onResume();
+            Log.e("BARCODEACT", "cameraResumed");
+        }
+
     }
 
     @Override
@@ -196,14 +227,13 @@ public class BarcodeScannerActivity extends AppCompatActivity {
         _cameraView.onStop();
         Log.e("BARCODEACT", "OnStop");
         super.onStop();
-        finish();
     }
 
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        _cameraView.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        _cameraView.onRequestPermissionsResult(requestCode,permissions,grantResults);
     }
 
     @Override
@@ -211,5 +241,14 @@ public class BarcodeScannerActivity extends AppCompatActivity {
         setResult(CommonStatusCodes.SUCCESS);
         Log.e("BackPRESSED", "userpressed back");
         finish();
+    }
+
+    public void startHandler() {
+        h.postDelayed(r, 50);
+    }
+
+    public void stopHandler() {
+        Log.e("BarcodeAPP", "removing callbacks");
+        h.removeCallbacks(r);
     }
 }

@@ -49,7 +49,7 @@ public class BarCodeScannerPlugin extends CordovaPlugin {
         if(requestCode == BARCODE_REQ){
             Log.e("RESULTCODE", ""+ resultCode);
             boolean isDataNull = data == null;
-            Log.e("DATA", ""+ isDataNull);
+            Log.e("DATA", "isNull:"+ isDataNull);
 
             if(resultCode == CommonStatusCodes.SUCCESS){
                 if(data != null){
